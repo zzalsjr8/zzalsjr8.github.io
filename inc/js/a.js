@@ -1,0 +1,798 @@
+
+import { Pane } from "https://esm.sh/tweakpane";
+
+const pane = new Pane({ expanded: true, container: document.getElementById('panelContainer') });
+
+let clickArray = [];
+
+const SETTINGS = {
+	filterList: '',
+	clickedList: '',
+	emojiSize: 50,
+	padding: 1,
+	margin:3,
+	rotate: 0,
+	border: true,
+	borderRadius: 5,
+	emojiBackground: '#f1f1f1',
+	design: 'standard',
+	display: 'displayGrid'
+};
+
+const folderGeneral = pane.addFolder({
+	title: '🟡 General',
+	expanded: true,
+});
+
+function init(){
+
+	// get the 3rd input field with a class of `tp-txtv_i`
+	const emjSize = document.querySelectorAll('.tp-txtv_i')[2].value;
+
+	// get the 1st select field with a class of `tp-lstv_s`
+	const itemList = document.getElementsByClassName("tp-lstv_s")[1];
+
+	const collection = itemList.selectedOptions;
+	const currentMode = collection[0].value;
+	Array.from(document.getElementsByClassName('emoji')).forEach((emoji) => {
+		emoji.style.setProperty('padding', `${SETTINGS.padding}px`);
+		emoji.style.setProperty('margin', `${SETTINGS.margin}px`);
+		emoji.style.setProperty('rotate', `${SETTINGS.rotate}deg`);
+		emoji.style.setProperty('background', `${SETTINGS.emojiBackground}`);
+		if(`${SETTINGS.border}` === 'true') {
+			emoji.style.setProperty('border-right', `1px solid #ccc`);
+			emoji.style.setProperty('border-bottom', `1px solid #ccc`);
+		} else if(`${SETTINGS.border}` === 'false') {
+			emoji.style.setProperty('border-right', `0px`);
+			emoji.style.setProperty('border-bottom', `0px`);
+		}
+		emoji.style.setProperty('border-radius', `${SETTINGS.borderRadius}px`);
+	});
+	Array.from(document.getElementsByClassName('spanForEmoji')).forEach((spanForEmoji) => {
+
+		// if current mode is "native-font", then set the font-size of the span to the value of SETTINGS.emojiSize
+		// otherwise set the font-size of the span to 20px and set the height and width of the img tag inside the span to the value of SETTINGS.emojiSize
+
+		// only set font-size if there is no <img> tag inside the span
+		if(spanForEmoji.getElementsByTagName('img').length < 1) {
+			spanForEmoji.style.setProperty('font-size', `${SETTINGS.emojiSize}px`);
+		} else {
+
+
+			spanForEmoji.style.setProperty('font-size', `20px`);
+			spanForEmoji.children[0].style.setProperty('height', `${SETTINGS.emojiSize}px`);
+			spanForEmoji.children[0].style.setProperty('width', `${SETTINGS.emojiSize}px`);
+		}
+	});
+	document.querySelectorAll('img').forEach((img) => {
+		img.onerror = function() {
+
+			const imageParent = getParentNode(img, 3);
+			imageParent.style.display = 'none';
+		}
+	});
+}
+
+folderGeneral.addBinding(SETTINGS, 'filterList', { label: 'filter' });
+folderGeneral.addBinding(SETTINGS, 'clickedList', { label: 'clicked-list' });
+
+const buttonCopyClicked = folderGeneral.addButton({
+	title: 'copy',
+	label: 'copy clicked'
+});
+
+buttonCopyClicked.on('click', () => {
+
+	// get the 2nd input field with a class of `tp-txtv_i`
+	const clickedListInput = document.querySelectorAll('.tp-txtv_i')[1];
+
+	// get the value of the text field
+	const clickedListInputText = clickedListInput.value;
+
+	// get the 1st button with a class of `tp-btnv_b`)
+	const buttonCopyClickedPanel = document.querySelectorAll('.tp-btnv_b')[0];
+
+	// add `my-custom-trigger` class to the copy button
+	buttonCopyClickedPanel.classList.add('my-custom-trigger');
+
+	// add `data-clipboard-text` attribute to the copy button whose value is the contents of the clicked list input field
+	buttonCopyClickedPanel.setAttribute('data-clipboard-text', clickedListInputText);
+
+	// copy the value of the `data-clipboard-text` attribute from element with class of `my-custom-trigger
+	const clipboard2 = new ClipboardJS('.my-custom-trigger');
+
+	clipboard2.on('success', function(e) {
+		buttonCopyClickedPanel.textContent = "copied!";
+		clickedListInput.focus();
+ 		clickedListInput.select();
+		setTimeout(function() {
+			buttonCopyClickedPanel.textContent = "copy";
+			// e.clearSelection();
+			clickedListInput.value = '';
+			clickArray = [];
+		}, 1800);
+	});
+});
+
+folderGeneral.addBinding(SETTINGS, 'emojiSize', { min: 20, max: 1000, step: 1, label: 'size' }).on('change', () => init());
+folderGeneral.addBinding(SETTINGS, 'padding', { min: 0, max: 250, step: 1, label: 'padding' }).on('change', () => init());
+folderGeneral.addBinding(SETTINGS, 'margin', { min: 0, max: 250, step: 1, label: 'margin' }).on('change', () => init());
+folderGeneral.addBinding(SETTINGS, 'rotate', { min: 0, max: 360, step: 1, label: 'rotate' }).on('change', () => init());
+folderGeneral.addBinding(SETTINGS, 'border').on('change', () => init());
+folderGeneral.addBinding(SETTINGS, 'borderRadius', { min: 0, max: 300, step: 1, label: 'border-radius' }).on('change', () => init());
+folderGeneral.addBinding(SETTINGS, 'emojiBackground', { label: 'emojibg' }).on('change', () => init());
+
+
+
+/*
+-------------------------
+ display folder
+ -------------------------
+*/
+
+const folderDisplay = pane.addFolder({
+	title: '🟡 Display Options',
+	expanded: true,
+});
+
+folderDisplay.addBinding(SETTINGS, 'display', { label: 'display', options: {
+	'grid': 'displayGrid' ,
+	'grid & info': 'displayGridInfo',
+	'grid & name': 'displayGridList',
+	'list & info': 'displayInfo',
+	'list & name': 'displayList'
+	}
+}).on('change', () => displayGridList(SETTINGS['display']));
+
+folderDisplay.addBinding(SETTINGS, 'design', { label: 'design', options: {
+	'native-font': 'standard' ,
+	'apple': 'apple',
+	'au-kddi': 'au-kddi',
+	'docomo': 'docomo',
+	'emojidex': 'emojidex',
+	'facebook': 'facebook',
+	'google': 'google',
+	'htc': 'htc',
+	'huawei': 'huawei',
+	'icons8': 'icons8',
+	'joypixels': 'joypixels',
+	'joypixels-animations': 'joypixels-animations',
+	'lg': 'lg',
+	'messenger': 'messenger',
+	'microsoft': 'microsoft',
+	'microsoft-3d-fluent': 'microsoft-3D-fluent',
+	'microsoft-teams': 'microsoft-teams',
+	'mozilla': 'mozilla',
+	'noto-emoji': 'noto-emoji',
+	'openmoji': 'openmoji',
+	'samsung': 'samsung',
+	'serenityos': 'serenityos',
+	'skype': 'skype',
+	'softbank': 'softbank',
+	'sony': 'sony',
+	'telegram': 'telegram',
+	'toss-face': 'toss-face',
+	'twitter': 'twitter',
+	'twitter-emoji-stickers': 'twitter-emoji-stickers',
+	'whatsapp': 'whatsapp'
+	}
+}).on('change', () => displayDesign(SETTINGS['design']));
+
+/*
+-------------------------
+ toggle folder
+ -------------------------
+*/
+
+const folderToggle = pane.addFolder({
+	title: '🟡 Toggle',
+	expanded: true,
+});
+
+const buttonToggleCat = folderToggle.addButton({
+	title: 'hide',
+	label: 'headings',   // optional
+});
+
+buttonToggleCat.on('click', () => {
+	const el = document.querySelectorAll(".tp-btnv_b")[1];
+	if(el.textContent === "hide"){
+		el.textContent = "show";
+	} else {
+		el.textContent = "hide";
+	}
+	toggleHeadings(buttonToggleCat, "category");
+	divAnchors.classList.toggle("hidden");
+});
+
+const buttonToggleSubCat = folderToggle.addButton({
+	title: 'show',
+	label: 'subcategories',   // optional
+});
+
+buttonToggleSubCat.on('click', () => {
+	const el = document.querySelectorAll(".tp-btnv_b")[2];
+	if(el.textContent === "hide"){
+		el.textContent = "show";
+	} else {
+		el.textContent = "hide";
+	}
+	toggleHeadings(buttonToggleSubCat, "subcategory");
+	divSubAnchors.classList.toggle("hidden");
+});
+
+var clipboard = new ClipboardJS('.emoji');
+
+// ###############################################################
+// Set page title and H1 link
+// ###############################################################
+
+const fileName = window.location.href.split('#')[0].split('?')[0].split('/').pop();
+document.title = fileName;
+document.getElementById("pageTitle").innerHTML = fileName;
+
+// ###############################################################
+// Initialise variables
+// ###############################################################
+
+const categoryCount = emojiArrayFull.length;
+const emojiCount = emojiArrayImgs.length;
+let versionsHtml = "";
+let totalEmojiCount = 0;
+let totalEmojiCountTemp = 0;
+let versionsArray = [];
+let hiddenClassInfo = " hidden";
+let hiddenClassList = " hidden";
+
+// ###############################################################
+// Assign variables from document
+// ###############################################################
+
+const divMainContent = document.getElementById("mainContent");
+const divAnchors = document.getElementById("emojiAnchors");
+const divSubAnchors = document.getElementById("emojiSubAnchors");
+const divSelectedEmojiVersionInfo = document.getElementById("selectedEmojiVersionInfo");
+const spanSelectedEmojiVersionInfoText = document.getElementById("selectedEmojiVersionInfoText");
+const spanSelectedEmojiVersionInfoNumber = document.getElementById("selectedEmojiVersionInfoNumber");
+const divEmojiVersions = document.getElementById("emojiVersions");
+const divEmojiClick = document.getElementById("emojiClick");
+const divEmojiData = document.getElementById("emojiData");
+const divEmojiCopyright = document.getElementById("emojiCopyright");
+const spanCurrentDesign = document.getElementById("currentDesign");
+
+// ###############################################################
+// Display version filter buttons
+// ###############################################################
+
+for(let i = 0; i < versions.length; i++){
+	const version = versions[i];
+	const list = version.split("|");
+	const versionNum = list[0];
+	const versionNumEmojiCount = list[1];
+	const versionNumDisplay = versionNum.replace("E","");
+	versionsArray.push(versionNum);
+	versionsHtml += "<div class='form-check form-check-inline'><input name='versions' checked class='versions form-check-input' data-version='" + versionNum + "' data-cdn='standard' type='checkbox' value='" + versionNum + "' id='versionCheck" + versionNum + "'><label class='form-check-label' for='versionCheck" + versionNum + "' title='Version: " + versionNum + "\nEmoji Count: " + versionNumEmojiCount + "'>" + versionNumDisplay + "</label></div>";
+}
+
+versionsHtml += `<input class="form-check-input" checked="checked" type="checkbox" value="toggle" id="versionsCheckToggle"> <label class="form-check-label" for="versionsCheckToggle">Toggle</label>`;
+
+divEmojiVersions.innerHTML = versionsHtml;
+
+// ###############################################################
+// Display emojis when page loads
+// ###############################################################
+
+function displayEmojis(){
+	const returnArray = [];
+	let concatHtmlArr = "";
+	let anchorsHtmlArr = "";
+	let subAnchorsHtmlArr = "";
+	for(let i = 0; i < categoryCount; i++){
+		// -----------------> 01 CATEGORY
+		const catItem = emojiArrayFull[i];
+		const catName = catItem.name;
+		const catEmoji = catItem.emoji;
+		const catTag = catItem.tag;
+		const childCount = catItem.ct;
+		const catChildren = catItem.children;
+		const catChildrenCount = catChildren.length;
+		anchorsHtmlArr += "<span><a href='#"+catTag+"'>" + catEmoji + " " + catName + "</a> / </span>";
+		subAnchorsHtmlArr += "<li class='mt-3'><span>" + catName + "</span><ul class='list-unstyled'>";
+		concatHtmlArr += "<h2 class='heading-category' id="+catTag+">" + catEmoji + " " + catName + " <a title='jump to top of the page' href='#top'>^</a></h5>";
+		for(let ii = 0; ii < catChildrenCount; ii++){
+			// -----------------> 02 SUBCATEGORY
+			const subItem = catChildren[ii];
+			const subName = subItem.name;
+			const subChildren = subItem.children;
+			const subChildrenCount = subChildren.length;
+			subAnchorsHtmlArr += "<li class='list-inline-item'><a href='#"+subName+"'>" + subName + "</a></li>";
+			concatHtmlArr += "<h5 class='heading-subcategory hidden' id="+subName+">" + subName + " <a title='jump to top of the page' href='#top'>^</a></h5>";
+			for(let iii = 0; iii < subChildrenCount; iii++){
+				// -----------------> 03 EMOJI
+				const emjItem = subChildren[iii];
+				const emjName = emjItem.description;
+				const emjEmoji = emjItem.emoji;
+				const emjVersion = emjItem.version;
+				let emjTitle = emjName + "\n" + emjEmoji + "\n" + emjVersion + "\n" + subName + "\n" + catName;
+				let emojiTextDetails = "<ul class='list-unstyled'>";
+				emojiTextDetails += "<li class='fs-6'>Emoji Name: <b>"+emjName+"</b></li>\n";
+				emojiTextDetails += "<li class='fs-6'>Emoji Version: <b>"+emjVersion+"</b></li>\n";
+				emojiTextDetails += "<li class='fs-6'>Category: <b>"+catName+"</b></li>\n";
+				emojiTextDetails += "<li class='fs-6'>Subcategory: <b>"+subName+"</b></li>";
+				emojiTextDetails += "</ul>";
+				emjTitle = emjTitle.toLowerCase();
+				concatHtmlArr += "<div class='emoji row' title='"+emjTitle+"' data-name='" + emjName + "' data-version='" + emjVersion + "' data-clipboard-text='" + emjEmoji + "'>";
+				concatHtmlArr += "	<div class='empty' data-clipboard-text='" + emjEmoji + "'>";
+				concatHtmlArr += "	<span class='spanForEmoji' data-emoji='" + emjEmoji + "'>" + emjEmoji + "</span> ";
+				concatHtmlArr += "	<span class='spanForEmojiTextInfo hidden'>" + emojiTextDetails + "</span>";
+				concatHtmlArr += "	<span class='spanForEmojiTextList fs-6 hidden'>" + emjName + "</span>";
+				concatHtmlArr += "	</div>";
+				concatHtmlArr += "</div>";
+				totalEmojiCount++;
+			}
+		}
+		subAnchorsHtmlArr += "</ul></li>";
+	}
+
+	returnArray.push(anchorsHtmlArr);
+	returnArray.push(subAnchorsHtmlArr);
+	returnArray.push(concatHtmlArr);
+	init();
+	return returnArray;
+}
+
+// page load first time
+
+const returnArray = displayEmojis();
+const anchorsHtml = returnArray[0];
+const subAnchorsHtml = returnArray[1];
+const concatHtml = returnArray[2];
+setContent(anchorsHtml, subAnchorsHtml, concatHtml);
+
+// ------------------------------------------------------
+
+const clickedListInput = document.querySelectorAll('.tp-txtv_i')[1];
+let joinedClickList;
+
+// ###############################################################
+// Document level event listeners
+// ###############################################################
+
+document.addEventListener('click', function(event) {
+
+	if(event.target.closest('div')){
+		if(event.target.closest('div').dataset.clipboardText){
+			const copyValue = event.target.closest('div').dataset.clipboardText;
+			if(document.querySelector('input[name="emojiClickRadio"]')){
+				const emojiClick = document.querySelector('input[name="emojiClickRadio"]:checked').value;
+
+				if(copyValue){
+					clickArray.push(copyValue);
+					joinedClickList = clickArray.join('');
+					clickedListInput.value = joinedClickList;
+					browseData(copyValue, emojiClick);
+				}
+			}
+		}
+	}
+	const pageLinkPrev = document.querySelectorAll('#page-link-prev')[0];	
+	const pageLinkNext = document.querySelectorAll('#page-link-next')[0];
+	const pageLinkStart = document.querySelectorAll('#page-link-start')[0];
+	const pageLinkEnd = document.querySelectorAll('#page-link-end')[0];
+
+	if(pageLinkPrev){
+		document.querySelector('#page-link-prev').addEventListener('click', function(event) {
+			event.preventDefault();
+			const clickedEmoji = event.target.dataset.emoji;
+			browseData(clickedEmoji, "browse");
+		});
+	}
+	if(pageLinkNext){
+		document.querySelector('#page-link-next').addEventListener('click', function(event) {
+			event.preventDefault();
+			const clickedEmoji = event.target.dataset.emoji;
+			browseData(clickedEmoji, "browse");
+		});
+	}
+	if(pageLinkStart){
+		document.querySelector('#page-link-start').addEventListener('click', function(event) {
+			event.preventDefault();
+			const startEmoji = emojiArrayImgs[0];
+			browseData(startEmoji, "browse");
+		});
+	}
+	if(pageLinkEnd){
+		document.querySelector('#page-link-end').addEventListener('click', function(event) {
+			event.preventDefault();
+			const endEmoji = emojiArrayImgs[emojiArrayImgs.length - 1];
+			browseData(endEmoji, "browse");
+		});
+	}
+
+});
+
+// ###############################################################
+// Toggle Heading and Subheadings
+// ###############################################################
+
+function toggleHeadings(buttonName, headingType){
+	const className = "heading-" + headingType;
+	const collectionHeadings = document.getElementsByClassName(className);
+	const collectionHeadingsLength = collectionHeadings.length;
+	// headings logic
+	if(buttonName.textContent === "Show headings"){
+		buttonName.textContent = "Hide headings";
+	} else if(buttonName.textContent === "Hide headings"){
+		buttonName.textContent = "Show headings";
+	// subheadings logic
+	} else if(buttonName.textContent === "Show subheadings"){
+		buttonName.textContent = "Hide subheadings";
+	} else if(buttonName.textContent === "Hide subheadings"){
+		buttonName.textContent = "Show subheadings";
+	}
+	for(let i = 0; i < collectionHeadingsLength; i++){
+		collectionHeadings[i].classList.toggle("hidden");
+	}
+}
+
+// ###############################################################
+// Emoji Unicode Version Filter - Buttons to Filter Records
+// ###############################################################
+
+// list for any change to change in checkboxes with a class of 'versions'
+// when anything is checked or unchecked, call versionsCheckEmojiRefresh()
+
+Array.from(document.getElementsByClassName('versions')).forEach((checkbox) => {
+	checkbox.addEventListener('change', (e)=>{
+		versionsCheckEmojiRefresh();
+	});
+});
+
+// toggle all checkbox
+
+document.getElementById('versionsCheckToggle').addEventListener('change', function () {
+
+	const versionChecks = document.querySelectorAll('.versions');
+		versionChecks.forEach(function (checkbox) {
+		checkbox.checked = this.checked;
+	}, this);
+	versionsCheckEmojiRefresh();
+});
+
+function versionsCheckEmojiRefresh(){
+	versionsArray = Array.from(document.querySelectorAll("input[type=checkbox][name=versions]:checked"), e => e.value);
+	Array.from(document.getElementsByClassName('emoji')).forEach((emoji) => {
+		const thisVersion = emoji.dataset.version;
+		const thisVersionArr = versionsArray.indexOf(thisVersion);
+		const thisText = emoji.dataset.clipboardText;
+		if(thisVersionArr < 0){
+			emoji.classList.add("hidden");
+		} else {
+			emoji.classList.remove("hidden");
+		}
+	})
+}
+
+// ###############################################################
+// Set HTML content for Divs
+// ###############################################################
+
+function setContent(anchorsHtml, subAnchorsHtml, concatHtml) {
+	emojiAnchors.innerHTML = anchorsHtml;
+	emojiSubAnchors.innerHTML = subAnchorsHtml;
+	emojiData.innerHTML = concatHtml;
+	init();
+}
+
+// ###############################################################
+// Grid / List
+// ###############################################################
+
+function displayGridList(mode){
+
+
+	
+	// get emojis (in an Object)
+	const emojis = document.getElementsByClassName("emoji");
+
+	// convert emojis Object to an Array
+	const emojiArray = Object.entries(emojis);
+
+	emojiArray.map(emoji=>{
+		const thisEmoji = emoji[1];
+		if(mode === "displayGrid") {
+			if(!thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.add("hidden");
+			}
+			if(!thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.add("hidden");
+			}
+		} else if (mode === "displayGridInfo") {
+			if(!thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.add("hidden");
+			}
+			if(thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.remove("hidden");
+			}
+		} else if (mode === "displayGridList") {
+			if(thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.remove("hidden");
+			}
+			if(!thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.add("hidden");
+			}
+		} else if (mode === "displayInfo") {
+			if(!thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.add("hidden");
+			}
+			if(thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.remove("hidden");
+			}
+		} else if (mode === "displayList") {
+			if(thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextList')[0].classList.remove("hidden");
+			}
+			if(!thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.contains('hidden')){
+				thisEmoji.getElementsByClassName('spanForEmojiTextInfo')[0].classList.add("hidden");
+			}
+		}
+	})
+
+	// set flex classes
+	// ------------------------
+
+	if(mode === "displayGrid" || mode === "displayGridInfo" || mode === "displayGridList") {
+		if(!divEmojiData.classList.contains("flex1")){
+			divEmojiData.classList.add("flex1");
+		}
+		if(!divEmojiData.classList.contains("flex1-wrap")){
+			divEmojiData.classList.add("flex1-wrap");
+		}
+	} else {
+
+
+		divEmojiData.classList.remove("flex1");
+		divEmojiData.classList.remove("flex1-wrap");
+
+	}
+
+}
+
+// ###############################################################
+// Design
+// ###############################################################
+
+// How to get parent multiple levels up the DOM tree without jQuery or modifying Element.prototype?
+// https://stackoverflow.com/a/65708136
+
+function getParentNode(element, level = 1) { // 1 - default value (if no 'level' parameter is passed to the function)
+    while (level-- > 0) {
+      element = element.parentNode;
+      if (!element) return null; // to avoid a possible "TypeError: Cannot read property 'parentNode' of null" if the requested level is higher than document
+    }
+    return element;
+}
+
+function displayDesign(design){
+
+
+
+	// get the 3rd input field with a class of `tp-txtv_i`
+	const emjSize = document.querySelectorAll('.tp-txtv_i')[2].value;
+
+	// get emojis (in an Object)
+	const emojis = document.getElementsByClassName("emoji");
+
+	// convert emojis Object to an Array
+	const emojiArray = Object.entries(emojis);
+
+	emojiArray.map(emoji=>{
+		const thisEmoji = emoji[1];
+		const v1 = thisEmoji.dataset.clipboardText; // .dataset.clipboardText
+		const v2 = thisEmoji.querySelector('.spanForEmoji');
+		if (design !== 'standard') {
+			// Replace span content with an <img> tag pointing to the CDN version
+			v2.innerHTML = "<img class='emoji-image' src='https://emoji-cdn.mqrio.dev/"+v1+"?style="+design+"' width='"+emjSize+"' height='"+emjSize+"' loading='lazy'>";
+			v2.style.setProperty('font-size', `20px`);
+			// jQuery/JavaScript to replace broken images
+			// https://stackoverflow.com/a/40263918
+			document.querySelectorAll('img').forEach((img) => {
+			img.onerror = function() {
+
+				const imageParent = getParentNode(img, 3);
+
+				imageParent.style.display = 'none';
+			}
+			});
+		} else {
+			// Replace <img> tag with the original emoji character
+			v2.innerHTML = v1;
+			v2.style.setProperty('font-size', `${emjSize}px`);
+		}
+	})
+
+	if(design === "standard"){
+		init();
+		divEmojiCopyright.classList.add("hidden");
+	} else {
+		divEmojiCopyright.classList.remove("hidden");
+		spanCurrentDesign.innerHTML = "<a href='https://emojipedia.org/" + design + "' rel='nofollow'>" + design + "</a>";
+	}
+
+}
+
+// ###############################################################
+// Emoji text filter
+// ###############################################################
+
+document.querySelectorAll('.tp-txtv_i')[0].addEventListener('keyup', function (e) {
+	e.stopPropagation();
+	const searchVal = this.value.toLowerCase();
+	const filterItems = document.querySelectorAll('[title]');
+	const catHeadings = document.querySelectorAll('.heading-category');
+	const subHeadings = document.querySelectorAll('.heading-subcategory');
+	const catButton = document.querySelectorAll('#toggleCat');
+	const subCatButton = document.querySelectorAll('#toggleSubCat');
+	if (searchVal !== '') {
+		filterItems.forEach(el => el.classList.add('hidden'));
+		catHeadings.forEach(el => el.classList.add('hidden'));
+		subHeadings.forEach(el => el.classList.add('hidden'));
+		divAnchors.classList.add('hidden');
+		divSubAnchors.classList.add('hidden');
+		divEmojiVersions.classList.add('hidden');
+		divEmojiClick.classList.add('hidden');
+		document.querySelectorAll(".tp-btnv_b")[1].textContent = "hide";
+		document.querySelectorAll(".tp-btnv_b")[2].textContent = "show";
+		document.querySelectorAll(`[title*="${searchVal}"]`).forEach(el => el.classList.remove('hidden'));
+	} else {
+		filterItems.forEach(el => el.classList.remove('hidden'));
+		catHeadings.forEach(el => el.classList.remove('hidden'));
+		divAnchors.classList.remove('hidden');
+		divSubAnchors.classList.add('hidden');
+		divEmojiVersions.classList.remove('hidden');
+		divEmojiClick.classList.remove('hidden');
+		document.querySelectorAll(".tp-btnv_b")[1].textContent = "hide";
+		document.querySelectorAll(".tp-btnv_b")[2].textContent = "show";
+	}
+});
+
+function browseData(clickedEmoji, emojiClick){
+	
+	if(emojiClick === "browse"){
+
+		document.getElementsByClassName("tp-lstv_s")[0].disabled = true;
+		document.getElementsByClassName("tp-lstv_s")[1].disabled = true;
+		document.getElementsByClassName("tp-fldv")[1].hidden = true;
+		document.getElementsByClassName("tp-fldv")[2].hidden = true;
+		const emojiIndex = emojiArrayImgs.indexOf(clickedEmoji);
+
+		
+		const emojiIndexPrevious = emojiIndex - 1;
+		const emojiIndexNext = emojiIndex + 1;
+		const emojiIndexPreviousValue = emojiArrayImgs[emojiIndexPrevious];
+		const emojiIndexNextValue = emojiArrayImgs[emojiIndexNext];
+
+
+
+		let startHtml = "<li class='page-item disabled'><a class='page-link' id='page-link-start'>Start</a></li>";
+		let endHtml = "<li class='page-item'><a class='page-link' id='page-link-end'>End</a></li>";
+		let prevHtml = "<li class='page-item disabled'><a class='page-link'>Previous</a></li>";
+		let nextHtml = "<li class='page-item disabled'><a class='page-link'>Next</a></li>";
+
+		if(emojiIndexPreviousValue){
+			const prevEmoji = emojiIndexPreviousValue;
+			const prevResult = findEmoji(prevEmoji);
+			startHtml = "<li class='page-item'><a href='#' class='page-link' id='page-link-start'>Start</a></li>";
+			prevHtml = "<li class='page-item'><a href='#' class='page-link' id='page-link-prev' data-emoji='" + prevEmoji + "'>Previous</a>";
+		} else {
+			startHtml = "<li class='page-item disabled'><a class='page-link'>Start</a></li>";
+		}
+		if(emojiIndexNextValue){
+			const nextEmoji = emojiIndexNextValue;
+			const nextResult = findEmoji(nextEmoji);
+			nextHtml = "<li class='page-item'><a href='#' class='page-link' id='page-link-next' data-emoji='" + nextEmoji + "'>Next</a>";
+			endHtml = "<li class='page-item'><a href='#' class='page-link' id='page-link-end'>End</a></li>";
+		} else {
+			endHtml = "<li class='page-item disabled'><a class='page-link'>End</a></li>";
+		}
+		const result = findEmoji(clickedEmoji);
+		const pos1 = result[0][0];
+		const pos2 = result[0][1];
+		const clickCatArr = emojiArrayFull[pos1];
+		const clickCat = clickCatArr.name;
+		const clickSub = clickCatArr['children'][pos2].name;
+		const clickedEmojiUnicode = result[1];
+		const clickedEmojiName = result[2];
+		const clickedEmojiVersion = result[4];
+
+		let paginationHtml = "<nav aria-label='Page navigation'><ul class='pagination'>" + startHtml + prevHtml + nextHtml + endHtml + "</ul></nav>";
+
+		let concatDesignsHtml = "<h1>" + clickedEmojiName + "</h1>";
+		concatDesignsHtml += "<nav aria-label='breadcrumb'><ol class='breadcrumb'><li class='breadcrumb-item'><a href='" + fileName + "'>Home</a></li><li class='breadcrumb-item active' aria-current='page'>" + clickedEmojiName + "</li></ol></nav>";
+		concatDesignsHtml += paginationHtml;
+		concatDesignsHtml += "<h4>" + clickedEmoji + " Category: <code>" +clickCat+ "</code> / Subcategory: <code>" +clickSub+ "</code></h4>";
+		concatDesignsHtml += "<h5>Name: <code><a href='https://emojipedia.org/" +clickedEmojiName+ "' rel='noopener noreferrer nofollow' target='_blank'>" +clickedEmojiName+ "</a></code> / Unicode: <code>" +clickedEmojiUnicode+ "</code> / Version: <code>" +clickedEmojiVersion+ "</code></h5>";
+		concatDesignsHtml += "<p>All emoji images were obtained from Emojipedia.org and are owned by their original distributors & designers. Designs are automatically hidden where no image exists (library up to date as of approximately Unicode 15).</p>";
+		concatDesignsHtml += "<div class='mb-2 border-bottom flex1 flex1-wrap shadow p-3 mb-5 bg-body-tertiary rounded'>";
+
+		for(let i=0; i < emojiDesignsArray.designs.length; i++){
+
+			const design = emojiDesignsArray.designs[i].design;
+			const designName = emojiDesignsArray.designs[i].name;
+
+			const designUrl = emojiDesignsArray.designs[i].url;
+			const emjName2 = clickedEmojiName;
+			let emjEmoji2 = clickedEmoji;
+			let emjOutput;
+			const emjVersion2 = clickedEmojiVersion;
+			// get the 3rd input field with a class of `tp-txtv_i`
+			const emjSize = document.querySelectorAll('.tp-txtv_i')[2].value;
+			let emjTitle = emjName2 + "\n" + emjEmoji2 + "\n" + emjVersion2 + "\n" + clickSub + "\n" + clickCat;
+
+			if (design !== 'native-font') {
+					// Replace span content with an <img> tag pointing to the CDN version
+				let emjImage = "<img class='emoji-image' src='https://emoji-cdn.mqrio.dev/"+emjEmoji2+"?style="+design+"' width='"+emjSize+"' height='"+emjSize+"' loading='lazy'>";
+					emjOutput = emjImage;
+			} else {
+				emjOutput = emjEmoji2;
+			}
+
+
+
+			let emojiTextDetails = "<ul class='list-unstyled'>";
+			emojiTextDetails += "<li class='fs-6'>Emoji Name: <b>"+emjName2+"</b></li>\n";
+			emojiTextDetails += "<li class='fs-6'>Emoji Version: <b>"+emjVersion2+"</b></li>\n";
+			emojiTextDetails += "<li class='fs-6'>Category: <b>"+clickCat+"</b></li>\n";
+			emojiTextDetails += "<li class='fs-6'>Subcategory: <b>"+clickSub+"</b></li>";
+			emojiTextDetails += "</ul>";
+			emjTitle = emjTitle.toLowerCase();
+			concatDesignsHtml += "<div class='emoji row' title='"+emjTitle+"' data-name='" + emjName2 + "' data-version='" + emjVersion2 + "' data-clipboard-text='" + emjEmoji2 + "'>";
+			concatDesignsHtml += "	<div class='empty' data-clipboard-text='" + emjEmoji2 + "'>";
+			concatDesignsHtml += "	<span class='spanForEmoji' data-emoji='" + emjEmoji2 + "'>" + emjOutput + "</span> ";
+			concatDesignsHtml += "	<span class='spanForEmojiTextInfo hidden'>" + emojiTextDetails + "</span>";
+			concatDesignsHtml += "	<span class='spanForEmojiTextList fs-6 hidden'>" + emjName2 + "</span>";
+			concatDesignsHtml += "	<div><a href='" + designUrl + "' target='_blank'>" + designName + "</a></div>";
+			concatDesignsHtml += "	</div>";
+			concatDesignsHtml += "</div>";
+
+		}
+
+		concatDesignsHtml += "</div>";
+
+		divMainContent.innerHTML = concatDesignsHtml;
+
+		// init("n");
+		init();
+
+	}
+	
+}
+
+
+
+function findEmoji(emoji) {
+	function search(items, position = []) {
+		for (let index = 0; index < items.length; index++) {
+			const item = items[index];
+			const emojiPosition = [...position, index];
+			if (item.emoji === emoji && item.description) {
+				return [
+					emojiPosition,
+					item.name,
+					item.tag,
+					item.description,
+					item.version,
+					item.emoji
+				];
+			}
+			if (Array.isArray(item.children)) {
+				const result = search(item.children, emojiPosition);
+				if (result) {
+					return result;
+				}
+			}
+		}
+		return null;
+	}
+	return search(emojiArrayFull);
+}
