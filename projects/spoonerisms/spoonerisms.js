@@ -7,6 +7,34 @@ const myData = [{
 				phrase: 'mind blowing'
 		},
 		{
+				spoonerism: 'nazlehut',
+				phrase: 'hazlenut'
+		},
+		{
+				spoonerism: 'flight and luffy',
+				phrase: 'light and fluffy'
+		},
+		{
+				spoonerism: 'blower tocks',
+				phrase: 'tower blocks'
+		},
+		{
+				spoonerism: 'mats and rice',
+				phrase: 'rice and mats'
+		},
+		{
+				spoonerism: 'snunchy crack',
+				phrase: 'crunchy snack'
+		},
+		{
+				spoonerism: 'cickled pockle',
+				phrase: 'pickled cockle'
+		},
+		{
+				spoonerism: 'cacking pubes',
+				phrase: 'packing cubes'
+		},
+		{
 				spoonerism: 'a range is as good as a chest',
 				phrase: 'a change is as good as a rest'
 		},
