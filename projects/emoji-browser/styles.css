@@ -1,0 +1,146 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Roboto&display=swap");
+
+html {
+	scroll-behavior: auto !important;
+}
+
+a,
+a:hover {
+	text-decoration: none
+}
+
+body {
+	font-family: 'Roboto', sans-serif;
+}
+
+h1,
+h2,
+.display-3 {
+	font-family: 'Anton', sans-serif;
+}
+
+.emjItem {
+	font-size: 30px;
+}
+
+.flex1-wrap {
+	flex-wrap: wrap !important;
+}
+
+.flex1 {
+	display: flex !important;
+}
+
+.emoji {
+	cursor: pointer;
+	/* border-right:1px solid #ccc; */
+	/* border-bottom:1px solid #ccc; */
+}
+
+.emoji:hover {
+	background: beige !important;
+}
+
+.controls-panel {
+	padding: 60px 1rem 1rem;
+	background: rgb(245, 245, 245);
+	border-radius: 8px;
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 8px;
+	transition: opacity 0.2s, transform 0.2s;
+}
+
+.list-inline-item::after {
+	content: " / ";
+	color: #ccc;
+}
+
+.span-for-emoji-text {
+	font-size: 20px;
+}
+
+
+
+/*
+CSS Rainbow Gradient Border (Animated)
+https://codepen.io/bramus/pen/rNWByYz
+*/
+
+.heading-category {
+	--angle: 0deg;
+	border-bottom: 1px solid;
+	border-image: conic-gradient(from var(--angle), red, yellow, lime, aqua, blue, magenta, red) 1;
+	animation: 10s rotate linear infinite;
+	margin-top: 25px;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+	width: 100%;
+}
+
+@keyframes rotate {
+	to {
+		--angle: 360deg;
+	}
+}
+
+@property --angle {
+	syntax: '<angle>';
+	initial-value: 0deg;
+	inherits: false;
+}
+
+.hidden {
+	display: none;
+}
+
+.heading-subcategory {
+	border-bottom: 1px solid #ccc;
+	margin-top: 25px;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+	width: 100%;
+}
+
+.button-small {
+	--bs-btn-padding-y: .25rem;
+	--bs-btn-padding-x: .5rem;
+	--bs-btn-font-size: .75rem;
+}
+
+.emoji-filter {
+	font-size: 20px;
+}
+
+/*
+.tp-rotv{
+	max-width: 300px;
+}
+*/
+
+#panelContainer{
+	max-width:300px;
+}
+
+:root {
+  --tp-base-background-color: hsla(0, 80%, 40%, 1.00);
+  --tp-base-shadow-color: hsla(0, 0%, 0%, 0.2);
+  --tp-button-background-color: hsla(0, 0%, 100%, 1.00);
+  --tp-button-background-color-active: hsla(0, 0%, 85%, 1);
+  --tp-button-background-color-focus: hsla(0, 0%, 90%, 1.00);
+  --tp-button-background-color-hover: hsla(0, 0%, 95%, 1.00);
+  --tp-button-foreground-color: hsla(230, 20%, 11%, 1.00);
+  --tp-container-background-color: hsla(0, 0%, 0%, 0.20);
+  --tp-container-background-color-active: hsla(0, 0%, 0%, 0.35);
+  --tp-container-background-color-focus: hsla(0, 0%, 0%, 0.30);
+  --tp-container-background-color-hover: hsla(0, 0%, 0%, 0.25);
+  --tp-container-foreground-color: hsla(0, 0%, 100%, 0.90);
+  --tp-groove-foreground-color: hsla(0, 0%, 0%, 0.50);
+  --tp-input-background-color: hsla(0, 0%, 0%, 0.50);
+  --tp-input-background-color-active: hsla(0, 0%, 0%, 0.65);
+  --tp-input-background-color-focus: hsla(0, 0%, 0%, 0.60);
+  --tp-input-background-color-hover: hsla(0, 0%, 0%, 0.55);
+  --tp-input-foreground-color: hsla(0, 0%, 100%, 0.90);
+  --tp-label-foreground-color: hsla(0, 0%, 100%, 0.90);
+  --tp-monitor-background-color: hsla(0, 0%, 0%, 0.50);
+  --tp-monitor-foreground-color: hsla(0, 0%, 100%, 0.50);
+}
