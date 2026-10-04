@@ -1,0 +1,11 @@
+a, a:hover {
+	text-decoration: none
+}
+
+body {
+	font-family: 'Roboto', sans-serif;
+}
+
+h1, h2, .display-3 {
+	font-family: 'Anton', sans-serif;
+}
