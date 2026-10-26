@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔎 Emoji Browser - Table</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<link href='https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.3.7/b-3.2.6/b-colvis-3.2.6/b-html5-3.2.6/b-print-3.2.6/r-3.0.8/sc-2.4.3/datatables.min.css' rel='stylesheet' integrity='sha384-VTQSeAIvqWFqITHpNRh6m+AFsTd2wLayRFTKQs4MVQAp4Dq99PvrIg9wRfzafAvs' crossorigin='anonymous'>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="container-fluid">
+	<div class="pb-2 mb-2 pt-2 border-bottom">
+		<h1>🔎 Emoji Browser - Table</h1>
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="https://zzalsjr8.github.io/">zzalsjr8</a></li>
+			<li class="breadcrumb-item"><a href="index.html">Emoji Browsers</a></li>
+			<li class="breadcrumb-item active">Emoji Browser - Table</li>
+		</ol>
+		<hr>
+		<a href="index.html" class="btn btn-primary btn-sm">Home</a> / 
+		<a href="emoji-browser-tweakpane.html" class="btn btn-primary btn-sm">Tweakpane</a> / 
+		<a href="emoji-browser-treeview.html" class="btn btn-primary btn-sm">Treeview</a> / 
+		<a href="emoji-browser-slidevars.html" class="btn btn-primary btn-sm">slideVars</a> / 
+		<a href="emoji-browser-simple-slider.html" class="btn btn-primary btn-sm">Simple Slider</a> / 
+		<a href="emoji-browser-table.html" class="btn btn-success btn-sm">> Table</a> / 
+		<hr>
+		<p>Browse emojis in a table format, using <a href="https://datatables.net/">DataTables - The Javascript Table Solution</a>.</p>
+		<p>The data used to populate the tree browser is stored in a javascript file called <a href="emojis.js">emojis.js</a>, and the emoji data is current as of <a href="https://www.unicode.org/Public/emoji/latest/emoji-test.txt">Emoji Version 18.0</a>. Read more about the version on <a href="https://emojipedia.org/emoji-18.0">Emojipedia</a>.</p>
+		<hr>
+		<table id='e' class='table table-striped table-hover table-sm table-bordered'>
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Emoji</th>
+					<th>Name</th>
+					<th>Tag</th>
+					<th>Unicode</th>
+					<th>Category</th>
+					<th>Subcategory</th>
+					<th>Version</th>
+				</tr>
+			</thead>
+			<tbody id='tableContent'></tbody>
+		</table>		
+		<hr>
+	</div>
+	<hr>
+	<p><a href="https://getbootstrap.com/" rel="nofollow">Bootstrap</a> | <a href="https://datatables.net/">DataTables - The Javascript Table Solution</a> | <a href="https://emojipedia.org/" rel="nofollow">Emojipedia</a></p>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src='https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.3.7/b-3.2.6/b-colvis-3.2.6/b-html5-3.2.6/b-print-3.2.6/r-3.0.8/sc-2.4.3/datatables.min.js' integrity='sha384-OoYMCZKaW0oO3nMUw+xDFi3JwbUVIP1jfXU2AHvOETtPx1BreX3SP+mgYQ5SzLwd' crossorigin='anonymous'></script>
+<script src="emojis.js"></script>
+<script>
+
+let rowHtml = "";
+let emojiCount = 1;
+for(let i = 0; i < emojiData.length; i++){
+	// -----------------> 01 CATEGORY
+	const catItem = emojiData[i];
+	const catName = catItem.name;
+	const catChildren = catItem.children;
+	for(let ii = 0; ii < catChildren.length; ii++){
+		// -----------------> 02 SUBCATEGORY
+		const subItem = catChildren[ii];
+		const subName = subItem.name;
+		const subChildren = subItem.children;
+		for(let iii = 0; iii < subChildren.length; iii++){
+			// -----------------> 03 EMOJI
+			rowHtml += "<tr>";
+			const emjItem = subChildren[iii];
+			const emjDescription = emjItem.description;
+			const emjTag = emjItem.tag;
+			const emjUnicode = emjItem.name;
+			const emjEmoji = emjItem.emoji;
+			const emjVersion = emjItem.version;
+			rowHtml += "<td>" + emojiCount + "</td>";
+			rowHtml += "<td>" + emjEmoji + "</td>";
+			rowHtml += "<td>" + emjDescription + "</td>";
+			rowHtml += "<td>" + emjTag + "</td>";
+			rowHtml += "<td>" + emjUnicode + "</td>";
+			rowHtml += "<td>" + catName + "</td>";
+			rowHtml += "<td>" + subName + "</td>";
+			rowHtml += "<td>" + emjVersion + "</td>";
+			rowHtml += "</tr>";
+			emojiCount++;
+		}
+	}
+}
+
+const dataTableRows = document.getElementById("tableContent");
+dataTableRows.innerHTML = rowHtml;
+
+$(document).ready( function() {
+	$('#e').dataTable({
+		/* No ordering applied by DataTables during initialisation */
+		"order": [],
+		"paging": false,
+		layout: {
+			topStart: {
+			buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+			}
+		}
+	});
+})
+
+</script>
+
+</body>
+
+</html>

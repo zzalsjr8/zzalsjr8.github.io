@@ -34,8 +34,6 @@ h2,
 
 .emoji {
 	cursor: pointer;
-	/* border-right:1px solid #ccc; */
-	/* border-bottom:1px solid #ccc; */
 }
 
 .emoji:hover {
@@ -111,15 +109,13 @@ https://codepen.io/bramus/pen/rNWByYz
 	font-size: 20px;
 }
 
-/*
-.tp-rotv{
-	max-width: 300px;
-}
-*/
-
 #panelContainer{
 	max-width:300px;
 }
+
+/*
+https://tweakpane.github.io/docs/theming/#builder
+*/
 
 :root {
   --tp-base-background-color: hsla(0, 80%, 40%, 1.00);
@@ -144,3 +140,32 @@ https://codepen.io/bramus/pen/rNWByYz
   --tp-monitor-background-color: hsla(0, 0%, 0%, 0.50);
   --tp-monitor-foreground-color: hsla(0, 0%, 100%, 0.50);
 }
+
+.a {
+	z-index: 1000;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	opacity: 0;
+	background-color: #306090;
+	padding: .8em;
+	font-size: 1em;
+	color: var(--background-color);
+	pointer-events: none;
+	transition: opacity .2s ease-in-out;
+	text-align: center
+}
+
+.a.show {
+	opacity: 1;
+	pointer-events: auto
+}
+
+.a span {
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0 .5em;
+	font-size: 1.6em
+}
+

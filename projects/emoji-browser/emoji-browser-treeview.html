@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌳 Emoji Browser - Treeview</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto&display=swap">
+<link rel="stylesheet" href="styles-quercus.css">
+<link rel='stylesheet' href='quercus/treeview.css'>
+</head>
+
+<body>
+
+<div class="container-fluid">
+	<div class="pb-2 mb-2 pt-2 border-bottom">
+		<h1>🌳 Emoji Browser - Treeview</h1>
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="https://zzalsjr8.github.io/">zzalsjr8</a></li>
+			<li class="breadcrumb-item"><a href="index.html">Emoji Browsers</a></li>
+			<li class="breadcrumb-item active">Emoji Browser - Treeview</li>
+		</ol>
+		<hr>
+		<a href="index.html" class="btn btn-primary btn-sm">Home</a> / 
+		<a href="emoji-browser-tweakpane.html" class="btn btn-primary btn-sm">Tweakpane</a> / 
+		<a href="emoji-browser-treeview.html" class="btn btn-success btn-sm">> Treeview</a> / 
+		<a href="emoji-browser-slidevars.html" class="btn btn-primary btn-sm">slideVars</a> / 
+		<a href="emoji-browser-simple-slider.html" class="btn btn-primary btn-sm">Simple Slider</a> / 
+		<a href="emoji-browser-table.html" class="btn btn-primary btn-sm">Table</a> / 
+		<hr>
+		<p>Browse emojis using <a href="https://github.com/stefaneichert/quercus.js" rel="nofollow">Quercus.js</a> - a lightweight and customizable javascript treeview library.</p>
+		<p>The data used to populate the tree browser is stored in a javascript file called <a href="emojis-quercus.js">emojis-quercus.js</a>, and the emoji data is current as of <a href="https://www.unicode.org/Public/emoji/latest/emoji-test.txt">Emoji Version 18.0</a>. Read more about the version on <a href="https://emojipedia.org/emoji-18.0">Emojipedia</a>.</p>
+	</div>
+	<div class='a js-a'> <span class='char js-copied-char'>X</span> <span>copied to clipboard</span> </div>
+	<div class='row'>
+		<div class='col-md-3' style='overflow: auto; height:590px; padding:10px; margin:20px; border:1px solid blue; border-radius:5px;'>
+			<h2>Emoji Tree</h2>
+			<div id='emojiTree'></div>
+		</div>
+		<div class='col-md-8' style='overflow: auto; height:590px; padding:10px; margin:20px; border:1px solid blue; border-radius:5px;'>
+			<div>
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb" id='breadcrumbs-area'>
+					<li class="breadcrumb-item active" aria-current="page">Home</li>
+					</ol>
+				</nav>
+			</div>
+			<hr>
+			<div class='character-grid' id='emojiData'><h1>Test</h1></div>
+			<hr>
+		</div>
+	</div>
+	<hr>
+	<p><a href="https://getbootstrap.com/" rel="nofollow">Bootstrap</a> | <a href="https://github.com/stefaneichert/quercus.js" rel="nofollow">Quercus</a> | <a href="https://clipboardjs.com/" rel="nofollow">Clipboard.js</a> | <a href="https://emojipedia.org/" rel="nofollow">Emojipedia</a></p>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script src='quercus/treeview.js'></script>
+<script src="emojis-quercus.js"></script>
+<script>
+
+// Initialize the first treeview (Multi-Select Disabled)
+// Click node text to select/deselect. Click +/- to expand/collapse.
+const emojiTree = new Treeview({
+	containerId: 'emojiTree', // ID of the HTML element to render the tree into
+	data: emojiQuercusData, // Your hierarchical data
+	searchEnabled: true, // Enable the search bar (default: true)
+	initiallyExpanded: true, // Start with nodes collapsed (default: false)
+	multiSelectEnabled: false, // Enable multi-selection by clicking nodes
+	showSelectAllButton: false,
+	showExpandCollapseAllButtons: true,
+	onSelectionChange: (selectedNodesData) => { // Callback when selection changes
+
+		console.log(1);
+		let html = "";
+		let breadcrumbs = "";
+
+		var result = Object.keys(selectedNodesData).map((key) => [selectedNodesData, selectedNodesData[key]]);
+
+		let selectedNodesData_length = selectedNodesData.length;
+
+		if(selectedNodesData_length > 0) {
+
+			let record_type = 	result[0][0][0]['type'];
+			let top_name = 		result[0][0][0]['name'];
+			let top_id = 		result[0][0][0]['id'];
+
+			if(record_type === "all") {
+
+				breadcrumbs += "<li class='breadcrumb-item active' aria-current='page'>"+top_name+"</li>";
+
+				for (i = 0; i < result[0][0][0]['children'].length; i++) {
+
+					let category_name = 	result[0][0][0]['children'][i]['name'];
+					let category_id = 		result[0][0][0]['children'][i]['id'];
+
+					html += "<h1 style='display:block; width:100%; background:yellow;'><a href='#' onclick=\"thisNode('"+category_id+"')\">"+category_name+"</a></h1>";
+
+					html += "<div class='d-flex flex-wrap'>";
+
+					let children_sub = result[0][0][0]['children'][i]['children'];
+
+					for (ii = 0; ii < result[0][0][0]['children'][i]['children'].length; ii++) {
+
+						let subcategory_name = 	result[0][0][0]['children'][i]['children'][ii]['name'];
+						let subcategory_id = 	result[0][0][0]['children'][i]['children'][ii]['id'];
+
+						// html += "<h2 style='display:block; width:100%; background:beige;'><a href='#' onclick=\"thisNode('"+subcategory_id+"')\">"+subcategory_name+"</a></h2>";
+
+						for (iii = 0; iii < result[0][0][0]['children'][i]['children'][ii]['children'].length; iii++) {
+
+							let emoji_name = 	result[0][0][0]['children'][i]['children'][ii]['children'][iii]['name'];
+							let emoji_id = 		result[0][0][0]['children'][i]['children'][ii]['children'][iii]['id'];
+							let emoji = 		result[0][0][0]['children'][i]['children'][ii]['children'][iii]['emoji'];
+
+							html += "<span data-filter-item data-filter-name='"+emoji_name+"' title='"+emoji_name+"' class='e' data-clipboard-text='"+emoji+"'>"+emoji+"</span>";
+
+						}
+
+					}
+
+					html += "</div><!-- / d-flex flex-wrap -->";
+
+				}
+
+			}
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			if(record_type === "category") {
+
+				let parent_id = 		result[0][1]['parent1_id'];
+				let parent_name = 		result[0][1]['parent1_name'];
+				let category_id = 		result[0][1]['id'];
+				let category_name = 	result[0][1]['name'];
+
+				breadcrumbs += "<li class='breadcrumb-item' aria-current='page'><a href='#'><a href='#' onclick=\"thisNode('"+parent_id+"')\">"+parent_name+"</a></li><li class='breadcrumb-item active' aria-current='page'>" + category_name + "</li>";
+
+				html += "<h1 style='display:block; width:100%; background:yellow;'>"+category_name+"</h1>";
+
+				html += "<div class='d-flex flex-wrap'>";
+
+				for (i = 0; i < result[0][0][0]['children'].length; i++) {
+
+					let subcategory_name = 	result[0][0][0]['children'][i]['name'];
+					let subcategory_id = 	result[0][0][0]['children'][i]['id'];
+
+					// html += "<h2 style='display:block; width:100%; background:beige;'><a href='#' onclick=\"thisNode('"+subcategory_id+"')\">"+subcategory_name+"</a></h2>";
+
+					for (ii = 0; ii < result[0][0][0]['children'][i]['children'].length; ii++) {
+
+						let emoji_name = 	result[0][0][0]['children'][i]['children'][ii]['name'];
+						let emoji_id = 		result[0][0][0]['children'][i]['children'][ii]['id'];
+						let emoji = 		result[0][0][0]['children'][i]['children'][ii]['emoji'];
+
+						html += "<span data-filter-item data-filter-name='"+emoji_name+"' title='"+emoji_name+"' class='e' data-clipboard-text='"+emoji+"'>"+emoji+"</span>";
+
+					}
+
+				}
+
+				html += "</div><!-- / d-flex flex-wrap -->";
+
+			}
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			if(record_type === "subcategory") {
+
+				let parent_id = 		result[0][1]['parent1_id'];
+				let parent_name = 		result[0][1]['parent1_name'];
+				let category_id = 		result[0][1]['parent2_id'];
+				let category_name = 	result[0][1]['parent2_name'];
+				let subcategory_id = 	result[0][1]['id'];
+				let subcategory_name = 	result[0][1]['name'];
+
+				breadcrumbs += "<li class='breadcrumb-item' aria-current='page'><a href='#' onclick=\"thisNode('"+parent_id+"')\">"+parent_name+"</a></li><li class='breadcrumb-item' aria-current='page'><a href='#' onclick=\"thisNode('"+category_id+"')\">" + category_name + "</a></li><li class='breadcrumb-item active' aria-current='page'>" + subcategory_name + "</li>";
+
+				html += "<h1 style='display:block; width:100%; background:yellow;'>"+subcategory_name+"</h1>";
+
+				html += "<div class='d-flex flex-wrap'>";
+
+				for (ii = 0; ii < result[0][1]['children'].length; ii++) {
+
+					let emoji_name = 	result[0][1]['children'][ii]['name'];
+					let emoji_id = 		result[0][1]['children'][ii]['id'];
+					let emoji = 		result[0][1]['children'][ii]['emoji'];
+
+					html += "<span data-filter-item data-filter-name='"+emoji_name+"' title='"+emoji_name+"' class='e' data-clipboard-text='"+emoji+"'>"+emoji+"</span>";
+
+				}
+
+				html += "</div><!-- / d-flex flex-wrap -->";
+
+			}
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			if(record_type === "emoji") {
+
+				let parent_id = 		result[0][1]['parent1_id'];
+				let parent_name = 		result[0][1]['parent1_name'];
+				let category_id = 		result[0][1]['parent2_id'];
+				let category_name = 	result[0][1]['parent2_name'];
+				let subcategory_id = 	result[0][1]['parent3_id'];
+				let subcategory_name = 	result[0][1]['parent3_name'];
+				let emoji_name = 		result[0][1]['name'];
+				let emoji_name_only = 	result[0][1]['name_only'];
+				let emoji_id = 			result[0][1]['id'];
+				let emoji = 			result[0][1]['emoji'];
+
+				breadcrumbs += "<li class='breadcrumb-item' aria-current='page'><a href='#' onclick=\"thisNode('"+parent_id+"')\">"+parent_name+"</a></li><li class='breadcrumb-item' aria-current='page'><a href='#' onclick=\"thisNode('"+category_id+"')\">" + category_name + "</a></li><li class='breadcrumb-item' aria-current='page'><a href='#' onclick=\"thisNode('"+subcategory_id+"')\">" + subcategory_name + "</a></li><li class='breadcrumb-item active' aria-current='page'>" + emoji_name + "</li>";
+				
+				html += "<h1 style='display:block; width:100%; background:yellow;'>" + emoji_name_only + "</h1>";
+
+				html += "<span data-filter-item data-filter-name='"+emoji_name+"' title='"+emoji_name+"' class='e' data-clipboard-text='"+emoji+"'>"+emoji+"</span>";
+
+			}
+
+			// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		} else {
+
+			html = "<h1>Selection Cleared</h1><a href=\"#\" onclick=\"thisNode('0')\">All Emojis</a>";
+
+		}
+	
+		document.getElementById('breadcrumbs-area').innerHTML = breadcrumbs;
+		document.getElementById('emojiData').innerHTML = html;
+		
+	}
+	
+});
+
+function thisNode(id) {
+	emojiTree.selectNodeById(id, true);
+}
+
+$(document).ready(function() {
+
+	var r = new ClipboardJS(".e");
+	r.on("success", function(t) {
+		$(".js-a").removeClass("show error").addClass("show")
+	  , $(".js-copied-char").text(t.text)
+	  , setTimeout(function() {
+			$(".js-a").removeClass("show")
+		}, 1250)
+	  , t.clearSelection()
+	});
+	
+});
+
+</script>
+</body>
+</html>
